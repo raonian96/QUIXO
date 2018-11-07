@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="piece"
+            type="com.raonstudio.findset.Piece" />
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:background="@drawable/piece_background">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:text='@{piece.token, default="O"}'
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textSize="40sp"
+            android:textColor="#ffffff"
+            app:layout_constraintDimensionRatio="1:1" />
+
+    </android.support.constraint.ConstraintLayout>
+</layout>
