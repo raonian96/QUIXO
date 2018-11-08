@@ -16,8 +16,7 @@
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="4dp"
+        android:layout_height="0dp"
         android:background="@drawable/piece_background"
         android:foreground="@{selected ? @drawable/piece_selector : null}">
 

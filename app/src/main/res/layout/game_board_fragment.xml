@@ -3,8 +3,6 @@
 
     <data>
 
-        <import type="com.raonstudio.findset.Direction" />
-
         <variable
             name="presenter"
             type="com.raonstudio.findset.BoardPresenter" />
@@ -16,18 +14,20 @@
         android:layout_height="wrap_content"
         app:layout_constraintDimensionRatio="1:1">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/board"
+        <com.raonstudio.findset.GameBoardLayout
+            android:id="@+id/board_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintBottom_toTopOf="@id/game_controller"
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <android.support.constraint.ConstraintLayout
+            android:id="@+id/game_controller"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            app:layout_constraintTop_toBottomOf="@id/board">
+            app:layout_constraintTop_toBottomOf="@id/board_container"
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <Button
                 android:id="@+id/arrow_right"
@@ -35,7 +35,7 @@
                 android:layout_height="80dp"
                 android:background="@null"
                 android:gravity="center"
-                android:onClick="@{() -> presenter.onDirectionClick(Direction.RIGHT)}"
+                android:onClick="@{() -> presenter.onDirectionClick()}"
                 android:text="⇨"
                 android:textSize="50sp"
                 android:textStyle="bold"
@@ -50,7 +50,7 @@
                 android:background="@null"
                 android:gravity="center"
                 android:text="⇩"
-                android:onClick="@{() -> presenter.onDirectionClick(Direction.DOWN)}"
+                android:onClick="@{() -> presenter.onDirectionClick()}"
                 android:textSize="50sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toStartOf="@+id/arrow_up"
@@ -64,7 +64,7 @@
                 android:background="@null"
                 android:gravity="center"
                 android:text="⇧"
-                android:onClick="@{() -> presenter.onDirectionClick(Direction.UP)}"
+                android:onClick="@{() -> presenter.onDirectionClick()}"
                 android:textSize="50sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toStartOf="@+id/arrow_left"
@@ -79,7 +79,7 @@
                 android:gravity="center"
                 android:text="⇦"
                 android:textSize="50sp"
-                android:onClick="@{() -> presenter.onDirectionClick(Direction.LEFT)}"
+                android:onClick="@{() -> presenter.onDirectionClick()}"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
