@@ -1,5 +1,9 @@
 package com.raonstudio.findset
 
-enum class Piece(val token: String?) {
-    O("O"), X("X"), BLANK(null)
+enum class PieceSymbol(val str: String? = null) {
+    O("O"), X("X"), BLANK()
+}
+
+class Piece {
+    var symbol = PieceSymbol.BLANK
 }
