@@ -1,4 +1,4 @@
-package com.raonstudio.findset
+package com.raonstudio.quixo
 
 import android.databinding.DataBindingUtil
 import android.os.Bundle
@@ -6,7 +6,7 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.raonstudio.findset.databinding.GameBoardFragmentBinding
+import com.raonstudio.quixo.databinding.GameBoardFragmentBinding
 import kotlinx.android.synthetic.main.game_board_fragment.*
 
 class GameBoardFragment : Fragment() {

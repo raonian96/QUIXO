@@ -9,7 +9,7 @@
 
     <fragment
         android:id="@+id/board_fragment"
-        android:name="com.raonstudio.findset.GameBoardFragment"
+        android:name="com.raonstudio.quixo.GameBoardFragment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"

@@ -1,4 +1,4 @@
-package com.raonstudio.findset
+package com.raonstudio.quixo
 
 import android.content.Context
 import android.content.res.Resources
@@ -8,7 +8,7 @@ import android.transition.TransitionManager
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
-import com.raonstudio.findset.databinding.PieceItemBinding
+import com.raonstudio.quixo.databinding.PieceItemBinding
 
 
 class GameBoardLayout(context: Context, attributeSet: AttributeSet) : ConstraintLayout(context, attributeSet) {

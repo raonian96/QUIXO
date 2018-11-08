@@ -1,4 +1,4 @@
-package com.raonstudio.findset
+package com.raonstudio.quixo
 
 enum class PieceSymbol(val str: String? = null) {
     O("O"), X("X"), BLANK()

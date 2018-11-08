@@ -5,7 +5,7 @@
 
         <variable
             name="presenter"
-            type="com.raonstudio.findset.BoardPresenter" />
+            type="com.raonstudio.quixo.BoardPresenter" />
     </data>
 
     <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintDimensionRatio="1:1">
 
-        <com.raonstudio.findset.GameBoardLayout
+        <com.raonstudio.quixo.GameBoardLayout
             android:id="@+id/board_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
