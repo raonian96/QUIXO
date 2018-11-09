@@ -2,6 +2,7 @@ package com.raonstudio.quixo
 
 import android.content.Context
 import android.content.res.Resources
+import android.databinding.ObservableInt
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
 import android.transition.TransitionManager
@@ -25,9 +26,9 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
         private const val COLUMN = 5
     }
 
-    private val symbolBindings: Array<Array<PieceItemBinding>>
+    private val pieces: Array<Array<Piece>>
     private val margin = (Resources.getSystem().displayMetrics.density * 4).toInt()
-    private var selectedView: View? = null
+    private var selectedViewId = ObservableInt()
 
     private fun getVerticalGuidLineId(index: Int) = VERTICAL_GUIDELINE_ID + index
     private fun getHorizontalGuidLineId(index: Int) = HORIZONTAL_GUIDELINE_ID + index
@@ -51,11 +52,12 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
             }
         }.toInt()
 
-        symbolBindings = Array(ROW) { i ->
+        pieces = Array(ROW) { i ->
             Array(COLUMN) { j ->
-                PieceItemBinding.inflate(LayoutInflater.from(context), this, true).apply {
+                val binding = PieceItemBinding.inflate(LayoutInflater.from(context), this, true).apply {
                     root.id = SYMBOL_ID + i * COLUMN + j
-                    piece = Piece()
+                    selectedId = selectedViewId
+                    root.setOnClickListener { if(selectedViewId.get() != it.id) selectedViewId.set(it.id) else selectedViewId.set(0) }
                 }.also {
                     val view = it.root
                     constraintSet.apply {
@@ -65,6 +67,7 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
                         constrainHeight(view.id, symbolWidth)
                     }
                 }
+                Piece(binding.root, i, j).also { binding.piece = it }
             }
         }
         constraintSet.applyTo(this)
@@ -94,15 +97,15 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
     }
 
     private fun swapHorizontalConstraint(constraintSet: ConstraintSet, row: Int, a: Int, b: Int) {
-        symbolBindings[row][a] = symbolBindings[row][b].also { symbolBindings[row][b] = symbolBindings[row][a] }
-        rearrangeHorizontalConstraint(constraintSet, symbolBindings[row][a].root, a)
-        rearrangeHorizontalConstraint(constraintSet, symbolBindings[row][b].root, b)
+        pieces[row][a] = pieces[row][b].also { pieces[row][b] = pieces[row][a] }
+        rearrangeHorizontalConstraint(constraintSet, pieces[row][a].view, a)
+        rearrangeHorizontalConstraint(constraintSet, pieces[row][b].view, b)
     }
 
     private fun swapVerticalConstraint(constraintSet: ConstraintSet, column: Int, a: Int, b: Int) {
-        symbolBindings[a][column] = symbolBindings[b][column].also { symbolBindings[b][column] = symbolBindings[a][column] }
-        rearrangeVerticalConstraint(constraintSet, symbolBindings[a][column].root, a)
-        rearrangeVerticalConstraint(constraintSet, symbolBindings[b][column].root, b)
+        pieces[a][column] = pieces[b][column].also { pieces[b][column] = pieces[a][column] }
+        rearrangeVerticalConstraint(constraintSet, pieces[a][column].view, a)
+        rearrangeVerticalConstraint(constraintSet, pieces[b][column].view, b)
     }
 
     private fun rearrangeHorizontalConstraint(constraintSet: ConstraintSet, view: View, index: Int) {

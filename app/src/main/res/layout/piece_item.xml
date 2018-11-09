@@ -10,15 +10,16 @@
             type="com.raonstudio.quixo.Piece" />
 
         <variable
-            name="selected"
-            type="Boolean" />
+            name="selectedId"
+            type="android.databinding.ObservableInt" />
     </data>
 
     <android.support.constraint.ConstraintLayout
+        android:id="@+id/item_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@drawable/piece_background"
-        android:foreground="@{selected ? @drawable/piece_selector : null}">
+        android:foreground="@{(selectedId == itemContainer.getId()) ? @drawable/piece_selector : null}">
 
         <TextView
             android:layout_width="match_parent"
