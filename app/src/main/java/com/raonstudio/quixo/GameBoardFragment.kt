@@ -24,8 +24,8 @@ class GameBoardFragment : Fragment() {
     }
 }
 
-class BoardPresenter(private val gameBoardLayout: GameBoardLayout){
-    fun onDirectionClick() {
-        gameBoardLayout.move()
+class BoardPresenter(private val gameBoardLayout: GameBoardLayout) {
+    fun onDirectionClick(direction: Direction) {
+        gameBoardLayout.move(direction)
     }
 }
