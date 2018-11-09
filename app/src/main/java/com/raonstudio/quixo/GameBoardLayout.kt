@@ -25,8 +25,9 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
         private const val COLUMN = 5
     }
 
-    private val symbolViews: Array<Array<View>>
+    private val symbolBindings: Array<Array<PieceItemBinding>>
     private val margin = (Resources.getSystem().displayMetrics.density * 4).toInt()
+    private var selectedView: View? = null
 
     private fun getVerticalGuidLineId(index: Int) = VERTICAL_GUIDELINE_ID + index
     private fun getHorizontalGuidLineId(index: Int) = HORIZONTAL_GUIDELINE_ID + index
@@ -50,16 +51,18 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
             }
         }.toInt()
 
-        symbolViews = Array(ROW) { i ->
+        symbolBindings = Array(ROW) { i ->
             Array(COLUMN) { j ->
-                PieceItemBinding.inflate(LayoutInflater.from(context), this, true).root.apply {
-                    id = SYMBOL_ID + i * COLUMN + j
+                PieceItemBinding.inflate(LayoutInflater.from(context), this, true).apply {
+                    root.id = SYMBOL_ID + i * COLUMN + j
+                    piece = Piece()
                 }.also {
+                    val view = it.root
                     constraintSet.apply {
-                        rearrangeVerticalConstraint(this, it, i)
-                        rearrangeHorizontalConstraint(this, it, j)
-                        constrainWidth(it.id, symbolWidth)
-                        constrainHeight(it.id, symbolWidth)
+                        rearrangeVerticalConstraint(this, view, i)
+                        rearrangeHorizontalConstraint(this, view, j)
+                        constrainWidth(view.id, symbolWidth)
+                        constrainHeight(view.id, symbolWidth)
                     }
                 }
             }
@@ -91,15 +94,15 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
     }
 
     private fun swapHorizontalConstraint(constraintSet: ConstraintSet, row: Int, a: Int, b: Int) {
-        symbolViews[row][a] = symbolViews[row][b].also { symbolViews[row][b] = symbolViews[row][a] }
-        rearrangeHorizontalConstraint(constraintSet, symbolViews[row][a], a)
-        rearrangeHorizontalConstraint(constraintSet, symbolViews[row][b], b)
+        symbolBindings[row][a] = symbolBindings[row][b].also { symbolBindings[row][b] = symbolBindings[row][a] }
+        rearrangeHorizontalConstraint(constraintSet, symbolBindings[row][a].root, a)
+        rearrangeHorizontalConstraint(constraintSet, symbolBindings[row][b].root, b)
     }
 
     private fun swapVerticalConstraint(constraintSet: ConstraintSet, column: Int, a: Int, b: Int) {
-        symbolViews[a][column] = symbolViews[b][column].also { symbolViews[b][column] = symbolViews[a][column] }
-        rearrangeVerticalConstraint(constraintSet, symbolViews[a][column], a)
-        rearrangeVerticalConstraint(constraintSet, symbolViews[b][column], b)
+        symbolBindings[a][column] = symbolBindings[b][column].also { symbolBindings[b][column] = symbolBindings[a][column] }
+        rearrangeVerticalConstraint(constraintSet, symbolBindings[a][column].root, a)
+        rearrangeVerticalConstraint(constraintSet, symbolBindings[b][column].root, b)
     }
 
     private fun rearrangeHorizontalConstraint(constraintSet: ConstraintSet, view: View, index: Int) {
