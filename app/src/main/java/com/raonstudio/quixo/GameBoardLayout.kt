@@ -5,20 +5,17 @@ import android.content.res.Resources
 import android.databinding.ObservableInt
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
+import android.transition.AutoTransition
+import android.transition.Transition
 import android.transition.TransitionManager
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
+import android.widget.Toast
 import com.raonstudio.quixo.databinding.PieceItemBinding
 
 
 class GameBoardLayout(context: Context, attributeSet: AttributeSet) : ConstraintLayout(context, attributeSet) {
     companion object {
-        /**
-         * [ConstraintSet]을 이용하기 위해서는 아이디를 세팅하여야 합니다.
-         * 이 프로젝트에서는 가이드라인과 애니메이션에 사용될 뷰들을 코드상에서 레이아웃에 추가하고 있습니다.
-         * 연관된 뷰들을 직접 동적으로 추가하고 있어 ID 의 시작 값에 대한 상수를 미리 정의해 놓아 사용합니다.
-         */
         private const val VERTICAL_GUIDELINE_ID = 101010
         private const val HORIZONTAL_GUIDELINE_ID = 201010
         private const val SYMBOL_ID = 202020
@@ -29,6 +26,23 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
     private val pieces: Array<Array<Piece>>
     private val margin = (Resources.getSystem().displayMetrics.density * 4).toInt()
     private var selectedViewId = ObservableInt()
+    private var selectedPiece: Piece? = null
+    private var touchable = true
+    private var nowTurn = PieceSymbol.O
+    private val symbolWidth = run {
+        Resources.getSystem().displayMetrics.let {
+            (it.widthPixels - (32 + 4 * 10) * it.density) / COLUMN
+        }
+    }.toInt()
+
+    private fun changeTurn() {
+        nowTurn = when (nowTurn) {
+            PieceSymbol.O -> PieceSymbol.X
+            PieceSymbol.X -> PieceSymbol.O
+            PieceSymbol.BLANK -> PieceSymbol.BLANK
+        }
+    }
+
 
     private fun getVerticalGuidLineId(index: Int) = VERTICAL_GUIDELINE_ID + index
     private fun getHorizontalGuidLineId(index: Int) = HORIZONTAL_GUIDELINE_ID + index
@@ -43,91 +57,115 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
                 setGuidelinePercent(getVerticalGuidLineId(it), 0.2f * it)
                 create(getHorizontalGuidLineId(it), ConstraintSet.HORIZONTAL_GUIDELINE)
                 setGuidelinePercent(getHorizontalGuidLineId(it), 0.2f * it)
+
             }
         }
-
-        val symbolWidth = run {
-            Resources.getSystem().displayMetrics.let {
-                (it.widthPixels - (32 + 4 * 10) * it.density) / COLUMN
-            }
-        }.toInt()
-
         pieces = Array(ROW) { i ->
             Array(COLUMN) { j ->
                 val binding = PieceItemBinding.inflate(LayoutInflater.from(context), this, true).apply {
                     root.id = SYMBOL_ID + i * COLUMN + j
                     selectedId = selectedViewId
-                    root.setOnClickListener { if(selectedViewId.get() != it.id) selectedViewId.set(it.id) else selectedViewId.set(0) }
-                }.also {
-                    val view = it.root
-                    constraintSet.apply {
-                        rearrangeVerticalConstraint(this, view, i)
-                        rearrangeHorizontalConstraint(this, view, j)
-                        constrainWidth(view.id, symbolWidth)
-                        constrainHeight(view.id, symbolWidth)
+                }
+                Piece(binding).apply {
+                    linkedGuidLineIDs = LinkedGuidLineIDs(
+                            getHorizontalGuidLineId(i),
+                            getHorizontalGuidLineId(i + 1),
+                            getVerticalGuidLineId(j),
+                            getVerticalGuidLineId(j + 1)
+                    )
+                }.also { piece ->
+                    binding.piece = piece
+                    binding.root.setOnClickListener {
+                        if (!piece.isBoundaryPiece() || (piece.symbol.str != null && piece.symbol != nowTurn)) return@setOnClickListener
+                        selectedPiece = if (selectedViewId.get() != it.id) {
+                            selectedViewId.set(it.id)
+                            piece
+                        } else {
+                            selectedViewId.set(0)
+                            null
+                        }
                     }
                 }
-                Piece(binding.root, i, j).also { binding.piece = it }
             }
         }
+
+        repeat(ROW) { i ->
+            repeat(COLUMN) { j ->
+                val piece = pieces[i][j]
+                rearrangePiece(constraintSet, piece)
+                pieces.getOrNull(i - 1)?.getOrNull(j - 1)?.linkedPieces?.bottomRight = piece
+                pieces.getOrNull(i - 1)?.getOrNull(j)?.linkedPieces?.bottom = piece
+                pieces.getOrNull(i - 1)?.getOrNull(j + 1)?.linkedPieces?.bottomLeft = piece
+                pieces.getOrNull(i)?.getOrNull(j - 1)?.linkedPieces?.right = piece
+                pieces.getOrNull(i)?.getOrNull(j + 1)?.linkedPieces?.left = piece
+                pieces.getOrNull(i + 1)?.getOrNull(j - 1)?.linkedPieces?.topRight = piece
+                pieces.getOrNull(i + 1)?.getOrNull(j)?.linkedPieces?.top = piece
+                pieces.getOrNull(i + 1)?.getOrNull(j + 1)?.linkedPieces?.topLeft = piece
+            }
+        }
+
         constraintSet.applyTo(this)
     }
 
     fun move(direction: Direction) {
-        val constraintSet = ConstraintSet()
-        constraintSet.clone(this)
-        moveToBoundary(constraintSet, 4, 2, direction)
-        TransitionManager.beginDelayedTransition(this)
-        constraintSet.applyTo(this)
-    }
-
-    private fun moveToBoundary(constraintSet: ConstraintSet, row: Int, column: Int, direction: Direction) {
-        nextPosition(row, column, direction)?.let {
-            when (direction) {
-                Direction.UP, Direction.DOWN -> {
-                    swapVerticalConstraint(constraintSet, column, row, it)
-                    moveToBoundary(constraintSet, it, column, direction)
-                }
-                Direction.LEFT, Direction.RIGHT -> {
-                    swapHorizontalConstraint(constraintSet, row, column, it)
-                    moveToBoundary(constraintSet, row, it, direction)
-                }
+        if (touchable) selectedPiece?.let { piece ->
+            piece.getLinkedPiece(direction) ?: run {
+                Toast.makeText(context, "제자리에 놓을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                return
             }
+
+            piece.symbol = nowTurn
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(this)
+            moveToBoundary(constraintSet, piece, direction)
+            val transition = AutoTransition()
+            transition.addListener(transitionListener)
+            TransitionManager.beginDelayedTransition(this, transition)
+            constraintSet.applyTo(this)
         }
     }
 
-    private fun swapHorizontalConstraint(constraintSet: ConstraintSet, row: Int, a: Int, b: Int) {
-        pieces[row][a] = pieces[row][b].also { pieces[row][b] = pieces[row][a] }
-        rearrangeHorizontalConstraint(constraintSet, pieces[row][a].view, a)
-        rearrangeHorizontalConstraint(constraintSet, pieces[row][b].view, b)
+    private fun moveToBoundary(constraintSet: ConstraintSet, piece: Piece, direction: Direction) {
+        piece.getLinkedPiece(direction)?.let {
+            Piece.swapLink(piece, it, direction)
+            moveToBoundary(constraintSet, piece, direction)
+            rearrangePiece(constraintSet, it)
+        } ?: rearrangePiece(constraintSet, piece)
     }
 
-    private fun swapVerticalConstraint(constraintSet: ConstraintSet, column: Int, a: Int, b: Int) {
-        pieces[a][column] = pieces[b][column].also { pieces[b][column] = pieces[a][column] }
-        rearrangeVerticalConstraint(constraintSet, pieces[a][column].view, a)
-        rearrangeVerticalConstraint(constraintSet, pieces[b][column].view, b)
-    }
-
-    private fun rearrangeHorizontalConstraint(constraintSet: ConstraintSet, view: View, index: Int) {
-        constraintSet.apply {
-            connect(view.id, ConstraintSet.START, getVerticalGuidLineId(index), ConstraintSet.END, margin)
-            connect(view.id, ConstraintSet.END, getVerticalGuidLineId(index + 1), ConstraintSet.START, margin)
+    private fun rearrangePiece(constraintSet: ConstraintSet, piece: Piece) {
+        val viewID = piece.binding.root.id
+        val guidLineIDs = piece.linkedGuidLineIDs
+        with(constraintSet) {
+            connect(viewID, ConstraintSet.TOP, guidLineIDs.top, ConstraintSet.TOP, margin)
+            connect(viewID, ConstraintSet.BOTTOM, guidLineIDs.bottom, ConstraintSet.BOTTOM, margin)
+            connect(viewID, ConstraintSet.START, guidLineIDs.start, ConstraintSet.START, margin)
+            connect(viewID, ConstraintSet.END, guidLineIDs.end, ConstraintSet.END, margin)
+            constrainWidth(viewID, symbolWidth)
+            constrainHeight(viewID, symbolWidth)
         }
     }
 
-    private fun rearrangeVerticalConstraint(constraintSet: ConstraintSet, view: View, index: Int) {
-        constraintSet.apply {
-            connect(view.id, ConstraintSet.TOP, getHorizontalGuidLineId(index), ConstraintSet.BOTTOM, margin)
-            connect(view.id, ConstraintSet.BOTTOM, getHorizontalGuidLineId(index + 1), ConstraintSet.TOP, margin)
+    private val transitionListener = object : Transition.TransitionListener {
+        override fun onTransitionEnd(transition: Transition?) {
+            touchable = true
+            selectedViewId.set(0)
+            selectedPiece = null
+            changeTurn()
         }
-    }
 
-    private fun nextPosition(row: Int, column: Int, direction: Direction): Int? {
-        return when (direction) {
-            Direction.LEFT -> if (column == 0) null else column - 1
-            Direction.RIGHT -> if (column == 4) null else column + 1
-            Direction.UP -> if (row == 0) null else row - 1
-            Direction.DOWN -> if (row == 4) null else row + 1
+        override fun onTransitionResume(transition: Transition?) {
         }
+
+        override fun onTransitionPause(transition: Transition?) {
+        }
+
+        override fun onTransitionCancel(transition: Transition?) {
+        }
+
+        override fun onTransitionStart(transition: Transition?) {
+            touchable = false
+        }
+
     }
 }
