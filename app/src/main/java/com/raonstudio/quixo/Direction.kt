@@ -3,7 +3,7 @@ package com.raonstudio.quixo
 enum class Direction {
     TOP, BOTTOM, LEFT, RIGHT, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT;
 
-    val oppsite: Direction
+    val opposite: Direction
         get() {
             return when (this) {
                 TOP -> BOTTOM

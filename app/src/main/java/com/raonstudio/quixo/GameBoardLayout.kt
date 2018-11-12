@@ -39,10 +39,8 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
         nowTurn = when (nowTurn) {
             PieceSymbol.O -> PieceSymbol.X
             PieceSymbol.X -> PieceSymbol.O
-            PieceSymbol.BLANK -> PieceSymbol.BLANK
         }
     }
-
 
     private fun getVerticalGuidLineId(index: Int) = VERTICAL_GUIDELINE_ID + index
     private fun getHorizontalGuidLineId(index: Int) = HORIZONTAL_GUIDELINE_ID + index
@@ -76,7 +74,7 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
                 }.also { piece ->
                     binding.piece = piece
                     binding.root.setOnClickListener {
-                        if (!piece.isBoundaryPiece() || (piece.symbol.str != null && piece.symbol != nowTurn)) return@setOnClickListener
+                        if (!piece.isBoundaryPiece() || (piece.symbol != null && piece.symbol != nowTurn)) return@setOnClickListener
                         selectedPiece = if (selectedViewId.get() != it.id) {
                             selectedViewId.set(it.id)
                             piece
