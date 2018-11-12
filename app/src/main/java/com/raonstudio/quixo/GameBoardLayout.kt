@@ -93,14 +93,14 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
             repeat(COLUMN) { j ->
                 val piece = pieces[i][j]
                 rearrangePiece(constraintSet, piece)
-                pieces.getOrNull(i - 1)?.getOrNull(j - 1)?.linkedPieces1?.set(Direction.BOTTOM_RIGHT, piece)
-                pieces.getOrNull(i - 1)?.getOrNull(j)?.linkedPieces1?.set(Direction.BOTTOM, piece)
-                pieces.getOrNull(i - 1)?.getOrNull(j + 1)?.linkedPieces1?.set(Direction.BOTTOM_LEFT, piece)
-                pieces.getOrNull(i)?.getOrNull(j - 1)?.linkedPieces1?.set(Direction.RIGHT, piece)
-                pieces.getOrNull(i)?.getOrNull(j + 1)?.linkedPieces1?.set(Direction.LEFT, piece)
-                pieces.getOrNull(i + 1)?.getOrNull(j - 1)?.linkedPieces1?.set(Direction.TOP_RIGHT, piece)
-                pieces.getOrNull(i + 1)?.getOrNull(j)?.linkedPieces1?.set(Direction.TOP, piece)
-                pieces.getOrNull(i + 1)?.getOrNull(j + 1)?.linkedPieces1?.set(Direction.TOP_LEFT, piece)
+                pieces.getOrNull(i - 1)?.getOrNull(j - 1)?.linkedPieces?.set(Direction.BOTTOM_RIGHT, piece)
+                pieces.getOrNull(i - 1)?.getOrNull(j)?.linkedPieces?.set(Direction.BOTTOM, piece)
+                pieces.getOrNull(i - 1)?.getOrNull(j + 1)?.linkedPieces?.set(Direction.BOTTOM_LEFT, piece)
+                pieces.getOrNull(i)?.getOrNull(j - 1)?.linkedPieces?.set(Direction.RIGHT, piece)
+                pieces.getOrNull(i)?.getOrNull(j + 1)?.linkedPieces?.set(Direction.LEFT, piece)
+                pieces.getOrNull(i + 1)?.getOrNull(j - 1)?.linkedPieces?.set(Direction.TOP_RIGHT, piece)
+                pieces.getOrNull(i + 1)?.getOrNull(j)?.linkedPieces?.set(Direction.TOP, piece)
+                pieces.getOrNull(i + 1)?.getOrNull(j + 1)?.linkedPieces?.set(Direction.TOP_LEFT, piece)
             }
         }
 

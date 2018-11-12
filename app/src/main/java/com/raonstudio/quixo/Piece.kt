@@ -18,10 +18,10 @@ class Piece(val binding: PieceItemBinding) : BaseObservable() {
             piece1.linkedGuidLineIDs = piece2.linkedGuidLineIDs
                     .also { piece2.linkedGuidLineIDs = piece1.linkedGuidLineIDs }
 
-            piece1.linkedPieces1 = piece2.linkedPieces1
-                    .also { piece2.linkedPieces1 = piece1.linkedPieces1 }
+            piece1.linkedPieces = piece2.linkedPieces
+                    .also { piece2.linkedPieces = piece1.linkedPieces }
 
-            piece2.linkedPieces1[direction] = piece1.also { piece1.linkedPieces1[direction.oppsite] = piece2 }
+            piece2.linkedPieces[direction] = piece1.also { piece1.linkedPieces[direction.oppsite] = piece2 }
 
             piece1.updateLinkFromOther()
             piece2.updateLinkFromOther()
@@ -36,22 +36,22 @@ class Piece(val binding: PieceItemBinding) : BaseObservable() {
         }
 
     lateinit var linkedGuidLineIDs: LinkedGuidLineIDs
-    var linkedPieces1 = HashMap<Direction, Piece>()
+    var linkedPieces = HashMap<Direction, Piece>()
 
     fun isBoundaryPiece(): Boolean {
-        return with(linkedPieces1){
+        return with(linkedPieces){
             get(Direction.TOP) == null || get(Direction.BOTTOM) == null
                     || get(Direction.LEFT) == null || get(Direction.RIGHT) == null
         }
     }
 
     fun getNextPieceOf(direction: Direction): Piece? {
-        return linkedPieces1[direction]
+        return linkedPieces[direction]
     }
 
     private fun updateLinkFromOther(){
-        linkedPieces1.forEach {
-            it.value.linkedPieces1[it.key.oppsite] = this
+        linkedPieces.forEach {
+            it.value.linkedPieces[it.key.oppsite] = this
         }
     }
 }
