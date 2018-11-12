@@ -18,18 +18,13 @@ class Piece(val binding: PieceItemBinding) : BaseObservable() {
             piece1.linkedGuidLineIDs = piece2.linkedGuidLineIDs
                     .also { piece2.linkedGuidLineIDs = piece1.linkedGuidLineIDs }
 
-            piece1.linkedPieces = piece2.linkedPieces
-                    .also { piece2.linkedPieces = piece1.linkedPieces }
+            piece1.linkedPieces1 = piece2.linkedPieces1
+                    .also { piece2.linkedPieces1 = piece1.linkedPieces1 }
 
-            when (direction) {
-                Direction.UP -> piece2.linkedPieces.top = piece1.also { piece1.linkedPieces.bottom = piece2 }
-                Direction.LEFT -> piece2.linkedPieces.left = piece1.also { piece1.linkedPieces.right = piece2 }
-                Direction.RIGHT -> piece2.linkedPieces.right= piece1.also { piece1.linkedPieces.left = piece2 }
-                Direction.DOWN -> piece2.linkedPieces.bottom = piece1.also { piece1.linkedPieces.top = piece2 }
-            }
+            piece2.linkedPieces1[direction] = piece1.also { piece1.linkedPieces1[direction.oppsite] = piece2 }
 
-            piece1.updateLinkfromOther()
-            piece2.updateLinkfromOther()
+            piece1.updateLinkFromOther()
+            piece2.updateLinkFromOther()
         }
     }
 
@@ -41,33 +36,22 @@ class Piece(val binding: PieceItemBinding) : BaseObservable() {
         }
 
     lateinit var linkedGuidLineIDs: LinkedGuidLineIDs
-    var linkedPieces = LinkedPieces()
+    var linkedPieces1 = HashMap<Direction, Piece>()
 
     fun isBoundaryPiece(): Boolean {
-        return with(linkedPieces){
-            top == null || left == null || right == null || bottom == null
+        return with(linkedPieces1){
+            get(Direction.TOP) == null || get(Direction.BOTTOM) == null
+                    || get(Direction.LEFT) == null || get(Direction.RIGHT) == null
         }
     }
 
-    fun getLinkedPiece(direction: Direction): Piece? {
-        return when (direction) {
-            Direction.UP -> linkedPieces.top
-            Direction.LEFT -> linkedPieces.left
-            Direction.RIGHT -> linkedPieces.right
-            Direction.DOWN -> linkedPieces.bottom
-        }
+    fun getNextPieceOf(direction: Direction): Piece? {
+        return linkedPieces1[direction]
     }
 
-    private fun updateLinkfromOther(){
-        with(linkedPieces){
-            top?.linkedPieces?.bottom = this@Piece
-            bottom?.linkedPieces?.top = this@Piece
-            left?.linkedPieces?.right = this@Piece
-            right?.linkedPieces?.left = this@Piece
-            topLeft?.linkedPieces?.bottomRight = this@Piece
-            topRight?.linkedPieces?.bottomLeft = this@Piece
-            bottomLeft?.linkedPieces?.topRight = this@Piece
-            bottomRight?.linkedPieces?.topLeft = this@Piece
+    private fun updateLinkFromOther(){
+        linkedPieces1.forEach {
+            it.value.linkedPieces1[it.key.oppsite] = this
         }
     }
 }
@@ -77,15 +61,4 @@ data class LinkedGuidLineIDs(
         val bottom: Int,
         val start: Int,
         val end: Int
-)
-
-data class LinkedPieces(
-        var top: Piece? = null,
-        var bottom: Piece? = null,
-        var left: Piece? = null,
-        var right: Piece? = null,
-        var topLeft: Piece? = null,
-        var topRight: Piece? = null,
-        var bottomLeft: Piece? = null,
-        var bottomRight: Piece? = null
 )

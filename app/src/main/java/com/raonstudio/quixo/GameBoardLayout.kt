@@ -93,14 +93,14 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
             repeat(COLUMN) { j ->
                 val piece = pieces[i][j]
                 rearrangePiece(constraintSet, piece)
-                pieces.getOrNull(i - 1)?.getOrNull(j - 1)?.linkedPieces?.bottomRight = piece
-                pieces.getOrNull(i - 1)?.getOrNull(j)?.linkedPieces?.bottom = piece
-                pieces.getOrNull(i - 1)?.getOrNull(j + 1)?.linkedPieces?.bottomLeft = piece
-                pieces.getOrNull(i)?.getOrNull(j - 1)?.linkedPieces?.right = piece
-                pieces.getOrNull(i)?.getOrNull(j + 1)?.linkedPieces?.left = piece
-                pieces.getOrNull(i + 1)?.getOrNull(j - 1)?.linkedPieces?.topRight = piece
-                pieces.getOrNull(i + 1)?.getOrNull(j)?.linkedPieces?.top = piece
-                pieces.getOrNull(i + 1)?.getOrNull(j + 1)?.linkedPieces?.topLeft = piece
+                pieces.getOrNull(i - 1)?.getOrNull(j - 1)?.linkedPieces1?.set(Direction.BOTTOM_RIGHT, piece)
+                pieces.getOrNull(i - 1)?.getOrNull(j)?.linkedPieces1?.set(Direction.BOTTOM, piece)
+                pieces.getOrNull(i - 1)?.getOrNull(j + 1)?.linkedPieces1?.set(Direction.BOTTOM_LEFT, piece)
+                pieces.getOrNull(i)?.getOrNull(j - 1)?.linkedPieces1?.set(Direction.RIGHT, piece)
+                pieces.getOrNull(i)?.getOrNull(j + 1)?.linkedPieces1?.set(Direction.LEFT, piece)
+                pieces.getOrNull(i + 1)?.getOrNull(j - 1)?.linkedPieces1?.set(Direction.TOP_RIGHT, piece)
+                pieces.getOrNull(i + 1)?.getOrNull(j)?.linkedPieces1?.set(Direction.TOP, piece)
+                pieces.getOrNull(i + 1)?.getOrNull(j + 1)?.linkedPieces1?.set(Direction.TOP_LEFT, piece)
             }
         }
 
@@ -109,7 +109,7 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
 
     fun move(direction: Direction) {
         if (touchable) selectedPiece?.let { piece ->
-            piece.getLinkedPiece(direction) ?: run {
+            piece.getNextPieceOf(direction) ?: run {
                 Toast.makeText(context, "제자리에 놓을 수 없습니다.", Toast.LENGTH_SHORT).show()
                 return
             }
@@ -126,7 +126,7 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
     }
 
     private fun moveToBoundary(constraintSet: ConstraintSet, piece: Piece, direction: Direction) {
-        piece.getLinkedPiece(direction)?.let {
+        piece.getNextPieceOf(direction)?.let {
             Piece.swapLink(piece, it, direction)
             moveToBoundary(constraintSet, piece, direction)
             rearrangePiece(constraintSet, it)
