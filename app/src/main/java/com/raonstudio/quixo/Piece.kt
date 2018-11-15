@@ -4,11 +4,14 @@ import android.databinding.BaseObservable
 import android.databinding.Bindable
 import com.raonstudio.quixo.databinding.PieceItemBinding
 
-enum class PieceSymbol(private val str: String) {
-    O("O"), X("X");
+enum class PieceSymbol {
+    O, X;
 
-    override fun toString(): String {
-        return this.str
+    operator fun not(): PieceSymbol {
+        return when (this) {
+            O -> X
+            X -> O
+        }
     }
 }
 
@@ -17,10 +20,8 @@ class Piece(val binding: PieceItemBinding) : BaseObservable() {
         fun swapLink(piece1: Piece, piece2: Piece, direction: Direction) {
             piece1.linkedGuidLineIDs = piece2.linkedGuidLineIDs
                     .also { piece2.linkedGuidLineIDs = piece1.linkedGuidLineIDs }
-
             piece1.linkedPieces = piece2.linkedPieces
                     .also { piece2.linkedPieces = piece1.linkedPieces }
-
             piece2.linkedPieces[direction] = piece1.also { piece1.linkedPieces[direction.opposite] = piece2 }
 
             piece1.updateLinkFromOther()
