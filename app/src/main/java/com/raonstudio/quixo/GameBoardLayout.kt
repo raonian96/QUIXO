@@ -34,10 +34,9 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
     private val symbolWidth = (getScreenWidth() - dip(32 + 4 * 10)) / COLUMN
 
     private fun changeTurn() {
-        nowTurn = when (nowTurn) {
-            PieceSymbol.O -> PieceSymbol.X
-            PieceSymbol.X -> PieceSymbol.O
-        }
+        nowTurn = !nowTurn
+        selectedViewId.set(0)
+        selectedPiece = null
     }
 
     private fun getVerticalGuidLineId(index: Int) = VERTICAL_GUIDELINE_ID + index
@@ -111,12 +110,15 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
             }
 
             piece.symbol = nowTurn
+
             val constraintSet = ConstraintSet()
             constraintSet.clone(this)
             moveToBoundary(constraintSet, piece, direction)
+
             val transition = AutoTransition()
             transition.addListener(transitionListener)
             TransitionManager.beginDelayedTransition(this, transition)
+
             constraintSet.applyTo(this)
         }
     }
@@ -132,6 +134,7 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
     private fun rearrangePiece(constraintSet: ConstraintSet, piece: Piece) {
         val viewID = piece.binding.root.id
         val guidLineIDs = piece.linkedGuidLineIDs
+
         with(constraintSet) {
             connect(viewID, ConstraintSet.TOP, guidLineIDs.top, ConstraintSet.TOP, margin)
             connect(viewID, ConstraintSet.BOTTOM, guidLineIDs.bottom, ConstraintSet.BOTTOM, margin)
@@ -145,8 +148,6 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
     private val transitionListener = object : Transition.TransitionListener {
         override fun onTransitionEnd(transition: Transition?) {
             touchable = true
-            selectedViewId.set(0)
-            selectedPiece = null
             changeTurn()
         }
 
