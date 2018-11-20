@@ -1,7 +1,6 @@
 package com.raonstudio.quixo
 
 import android.content.Context
-import android.content.res.Resources
 import android.databinding.ObservableInt
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
@@ -10,8 +9,9 @@ import android.transition.Transition
 import android.transition.TransitionManager
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.widget.Toast
 import com.raonstudio.quixo.databinding.PieceItemBinding
+import org.jetbrains.anko.dip
+import org.jetbrains.anko.toast
 
 
 class GameBoardLayout(context: Context, attributeSet: AttributeSet) : ConstraintLayout(context, attributeSet) {
@@ -24,16 +24,14 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
     }
 
     private val pieces: Array<Array<Piece>>
-    private val margin = (Resources.getSystem().displayMetrics.density * 4).toInt()
+    private val margin = dip(4)
     private var selectedViewId = ObservableInt()
     private var selectedPiece: Piece? = null
     private var touchable = true
     private var nowTurn = PieceSymbol.O
-    private val symbolWidth = run {
-        Resources.getSystem().displayMetrics.let {
-            (it.widthPixels - (32 + 4 * 10) * it.density) / COLUMN
-        }
-    }.toInt()
+
+    //(스크린 너비 - (좌우 여백 + 블럭 좌우 여백)) / COLUMN
+    private val symbolWidth = (getScreenWidth() - dip(32 + 4 * 10)) / COLUMN
 
     private fun changeTurn() {
         nowTurn = when (nowTurn) {
@@ -108,7 +106,7 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
     fun move(direction: Direction) {
         if (touchable) selectedPiece?.let { piece ->
             piece.getNextPieceOf(direction) ?: run {
-                Toast.makeText(context, "제자리에 놓을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                context.toast("제자리에 놓을 수 없습니다.")
                 return
             }
 
