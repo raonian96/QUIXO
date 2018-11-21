@@ -8,11 +8,11 @@ import android.transition.AutoTransition
 import android.transition.Transition
 import android.transition.TransitionManager
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import com.raonstudio.quixo.databinding.PieceItemBinding
 import org.jetbrains.anko.dip
 import org.jetbrains.anko.toast
-
 
 class GameBoardLayout(context: Context, attributeSet: AttributeSet) : ConstraintLayout(context, attributeSet) {
     companion object {
@@ -34,6 +34,7 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
     private val symbolWidth = (getScreenWidth() - dip(32 + 4 * 10)) / COLUMN
 
     private fun changeTurn() {
+        Log.d("checkWinner()", checkWinner()?.name ?: "none")
         nowTurn = !nowTurn
         selectedViewId.set(0)
         selectedPiece = null
@@ -104,7 +105,7 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
 
     fun move(direction: Direction) {
         if (touchable) selectedPiece?.let { piece ->
-            piece.getNextPieceOf(direction) ?: run {
+            piece.getNextPiece(direction) ?: run {
                 context.toast("제자리에 놓을 수 없습니다.")
                 return
             }
@@ -124,7 +125,7 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
     }
 
     private fun moveToBoundary(constraintSet: ConstraintSet, piece: Piece, direction: Direction) {
-        piece.getNextPieceOf(direction)?.let {
+        piece.getNextPiece(direction)?.let {
             Piece.swapLink(piece, it, direction)
             moveToBoundary(constraintSet, piece, direction)
             rearrangePiece(constraintSet, it)
@@ -143,6 +144,25 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
             constrainWidth(viewID, symbolWidth)
             constrainHeight(viewID, symbolWidth)
         }
+    }
+
+    private fun checkWinner(): PieceSymbol? {
+        var isNowTurnWin = false
+        repeat(ROW) {
+            if (pieces[it][it].checkMakeFive()) {
+                if (pieces[it][it].symbol == nowTurn.not())
+                    return nowTurn.not()
+                else isNowTurnWin = true
+            }
+        }
+        pieces[2][2].symbol?.let {
+            if (pieces[2][2].checkMakeFiveDiagonally(it)) {
+                if (it == nowTurn.not())
+                    return nowTurn.not()
+                else isNowTurnWin = true
+            }
+        }
+        return nowTurn.takeIf { isNowTurnWin }
     }
 
     private val transitionListener = object : Transition.TransitionListener {
