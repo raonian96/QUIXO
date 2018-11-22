@@ -62,13 +62,14 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
                     root.id = SYMBOL_ID + i * COLUMN + j
                     selectedId = selectedViewId
                 }
-                Piece(binding).apply {
+                Piece().apply {
                     linkedGuidLineIDs = LinkedGuidLineIDs(
                             getHorizontalGuidLineId(i),
                             getHorizontalGuidLineId(i + 1),
                             getVerticalGuidLineId(j),
                             getVerticalGuidLineId(j + 1)
                     )
+                    linkedViewId = binding.root.id
                 }.also { piece ->
                     binding.piece = piece
                     binding.root.setOnClickListener {
@@ -133,7 +134,7 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
     }
 
     private fun rearrangePiece(constraintSet: ConstraintSet, piece: Piece) {
-        val viewID = piece.binding.root.id
+        val viewID = piece.linkedViewId
         val guidLineIDs = piece.linkedGuidLineIDs
 
         with(constraintSet) {

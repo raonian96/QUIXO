@@ -2,7 +2,6 @@ package com.raonstudio.quixo
 
 import android.databinding.BaseObservable
 import android.databinding.Bindable
-import com.raonstudio.quixo.databinding.PieceItemBinding
 
 enum class PieceSymbol {
     O, X;
@@ -15,7 +14,7 @@ enum class PieceSymbol {
     }
 }
 
-class Piece(val binding: PieceItemBinding) : BaseObservable() {
+class Piece : BaseObservable() {
     companion object {
         fun swapLink(piece1: Piece, piece2: Piece, direction: Direction) {
             piece1.linkedGuidLineIDs = piece2.linkedGuidLineIDs
@@ -38,6 +37,7 @@ class Piece(val binding: PieceItemBinding) : BaseObservable() {
 
     lateinit var linkedGuidLineIDs: LinkedGuidLineIDs
     var linkedPieces = HashMap<Direction, Piece>()
+    var linkedViewId: Int = 0
 
     fun isBoundaryPiece(): Boolean {
         return with(linkedPieces) {
