@@ -53,9 +53,9 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
                 setGuidelinePercent(getVerticalGuidLineId(it), 0.2f * it)
                 create(getHorizontalGuidLineId(it), ConstraintSet.HORIZONTAL_GUIDELINE)
                 setGuidelinePercent(getHorizontalGuidLineId(it), 0.2f * it)
-
             }
         }
+
         pieces = Array(ROW) { i ->
             Array(COLUMN) { j ->
                 val binding = PieceItemBinding.inflate(LayoutInflater.from(context), this, true).apply {
@@ -110,7 +110,6 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
                 context.toast("제자리에 놓을 수 없습니다.")
                 return
             }
-
             piece.symbol = nowTurn
 
             val constraintSet = ConstraintSet()
@@ -149,6 +148,7 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
 
     private fun checkWinner(): PieceSymbol? {
         var isNowTurnWin = false
+
         repeat(ROW) {
             if (pieces[it][it].checkMakeFive()) {
                 if (pieces[it][it].symbol == nowTurn.not())
@@ -163,6 +163,7 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
                 else isNowTurnWin = true
             }
         }
+
         return nowTurn.takeIf { isNowTurnWin }
     }
 
@@ -184,6 +185,5 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
         override fun onTransitionStart(transition: Transition?) {
             touchable = false
         }
-
     }
 }
