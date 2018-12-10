@@ -63,9 +63,11 @@ class Piece : BaseObservable() {
         return (checkLinearSymbol(Direction.LEFT, symbol) && checkLinearSymbol(Direction.RIGHT, symbol))
     }
 
-    fun checkMakeFiveDiagonally(symbol: PieceSymbol): Boolean {
-        return ((checkLinearSymbol(Direction.TOP_LEFT, symbol) && checkLinearSymbol(Direction.BOTTOM_RIGHT, symbol))
-                || (checkLinearSymbol(Direction.TOP_RIGHT, symbol) && checkLinearSymbol(Direction.BOTTOM_LEFT, symbol)))
+    fun checkMakeFiveDiagonally(): Boolean {
+        return symbol?.let {
+            ((checkLinearSymbol(Direction.TOP_LEFT, it) && checkLinearSymbol(Direction.BOTTOM_RIGHT, it))
+                    || (checkLinearSymbol(Direction.TOP_RIGHT, it) && checkLinearSymbol(Direction.BOTTOM_LEFT, it)))
+        } ?: false
     }
 
     fun checkMakeFive(): Boolean {

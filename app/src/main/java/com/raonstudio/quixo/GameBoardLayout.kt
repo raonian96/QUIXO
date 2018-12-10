@@ -147,24 +147,37 @@ class GameBoardLayout(context: Context, attributeSet: AttributeSet) : Constraint
     }
 
     private fun checkWinner(): PieceSymbol? {
+        var piece = getLeftTopCornerPiece()
         var isNowTurnWin = false
 
-        repeat(ROW) {
-            if (pieces[it][it].checkMakeFive()) {
-                if (pieces[it][it].symbol == nowTurn.not())
-                    return nowTurn.not()
-                else isNowTurnWin = true
+        while (true) {
+            if (piece.checkMakeFive()) {
+                if (piece.symbol == nowTurn)
+                    isNowTurnWin = true
+                else
+                    return piece.symbol
             }
-        }
-        pieces[2][2].symbol?.let {
-            if (pieces[2][2].checkMakeFiveDiagonally(it)) {
-                if (it == nowTurn.not())
-                    return nowTurn.not()
-                else isNowTurnWin = true
-            }
+            piece = piece.linkedPieces[Direction.BOTTOM_RIGHT] ?: break
         }
 
+        val centerPiece = getLeftTopCornerPiece().linkedPieces[Direction.BOTTOM_RIGHT]!!.linkedPieces[Direction.BOTTOM_RIGHT]!!
+        if (centerPiece.checkMakeFiveDiagonally()) {
+            if (centerPiece.symbol == nowTurn)
+                isNowTurnWin = true
+            else
+                return centerPiece.symbol
+        }
         return nowTurn.takeIf { isNowTurnWin }
+    }
+
+    private fun getLeftTopCornerPiece(): Piece {
+        var piece = pieces[0][0]
+        while (piece.linkedPieces[Direction.LEFT] != null || piece.linkedPieces[Direction.TOP] != null) {
+            piece.linkedPieces[Direction.TOP_LEFT]?.let { piece = it }
+            piece.linkedPieces[Direction.TOP]?.let { piece = it }
+            piece.linkedPieces[Direction.LEFT]?.let { piece = it }
+        }
+        return piece
     }
 
     private val transitionListener = object : Transition.TransitionListener {

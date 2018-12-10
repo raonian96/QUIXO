@@ -54,22 +54,37 @@ class ExampleUnitTest {
     }
 
     private fun checkWinner(pieces: Array<Array<Piece>>): PieceSymbol? {
+        var piece = getLeftTopCornerPiece(pieces)
         var isNowTurnWin = false
-        repeat(5) {
-            if (pieces[it][it].checkMakeFive()) {
-                if (pieces[it][it].symbol == nowTurn.not())
-                    return nowTurn.not()
-                else isNowTurnWin = true
+
+        while (true) {
+            if (piece.checkMakeFive()) {
+                if (piece.symbol == nowTurn)
+                    isNowTurnWin = true
+                else
+                    return piece.symbol
             }
+            piece = piece.linkedPieces[Direction.BOTTOM_RIGHT] ?: break
         }
-        pieces[2][2].symbol?.let {
-            if (pieces[2][2].checkMakeFiveDiagonally(it)) {
-                if (it == nowTurn.not())
-                    return nowTurn.not()
-                else isNowTurnWin = true
-            }
+
+        val centerPiece = getLeftTopCornerPiece(pieces).linkedPieces[Direction.BOTTOM_RIGHT]!!.linkedPieces[Direction.BOTTOM_RIGHT]!!
+        if (centerPiece.checkMakeFiveDiagonally()) {
+            if (centerPiece.symbol == nowTurn)
+                isNowTurnWin = true
+            else
+                return centerPiece.symbol
         }
         return nowTurn.takeIf { isNowTurnWin }
+    }
+
+    private fun getLeftTopCornerPiece(pieces: Array<Array<Piece>>): Piece {
+        var piece = pieces[0][0]
+        while (piece.linkedPieces[Direction.LEFT] != null || piece.linkedPieces[Direction.TOP] != null) {
+            piece.linkedPieces[Direction.TOP_LEFT]?.let { piece = it }
+            piece.linkedPieces[Direction.TOP]?.let { piece = it }
+            piece.linkedPieces[Direction.LEFT]?.let { piece = it }
+        }
+        return piece
     }
 
     private val testCaseSymbols = arrayOf(
